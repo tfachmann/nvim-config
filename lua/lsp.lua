@@ -43,21 +43,44 @@ nvim_lsp['null-ls'].setup({
     on_attach = on_attach,
 })
 
-nvim_lsp.pylsp.setup{
+nvim_lsp.pyright.setup {
     on_attach = on_attach,
     capabilities = capabilities,
 }
+
 local sumneko_lib = "/usr/lib/lua-language-server/main.lua"
 local sumneko_binary = "/usr/bin/lua-language-server"
-nvim_lsp.sumneko_lua.setup{
+local runtime_path = vim.split(package.path, ";")
+table.insert(runtime_path, 'lua/?.lua')
+table.insert(runtime_path, 'lua/?/init.lua')
+nvim_lsp.sumneko_lua.setup {
     cmd = {sumneko_binary, "-E", sumneko_lib};
+    settings = {
+        Lua = {
+            runtime = {
+                version = 'LuaJIT',
+                path = runtime_path,
+            },
+            diagnostics = {
+                globals = {'vim'},
+            },
+            workspace = {
+                library = vim.api.nvim_get_runtime_file('', true),
+            },
+            telemetry = {
+                enable = false,
+            }
+        },
+    },
     on_attach = on_attach,
     capabilities = capabilities,
 }
+
 nvim_lsp.vimls.setup{
     on_attach = on_attach,
     capabilities = capabilities,
 }
+
 nvim_lsp.html.setup{
     on_attach = on_attach,
     capabilities = capabilities,
@@ -67,14 +90,17 @@ nvim_lsp.cssls.setup{
     on_attach = on_attach,
     capabilities = capabilities,
 }
+
 nvim_lsp.clangd.setup{
     on_attach = on_attach,
     capabilities = capabilities,
 }
+
 nvim_lsp.rust_analyzer.setup{
     on_attach = on_attach,
     capabilities = capabilities,
 }
+
 nvim_lsp.texlab.setup{
     on_attach = on_attach,
     capabilities = capabilities,
