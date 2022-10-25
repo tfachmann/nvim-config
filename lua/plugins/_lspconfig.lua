@@ -1,3 +1,5 @@
+-- Excellent example: https://github.com/lukas-reineke/dotfiles/blob/master/vim/lua/lsp/init.lua
+
 if not _G.plugin_loaded("nvim-lspconfig") then
     do return end
 end
@@ -11,6 +13,19 @@ if _G.plugin_loaded("null-ls.nvim") then
     require("null-ls").setup({
         sources = sources
     })
+end
+
+if _G.plugin_loaded("lsp-format.nvim") then
+    require("lsp-format").setup {}
+end
+
+if _G.plugin_loaded("lsp-inlayhints.nvim") then
+    require("lsp-inlayhints").setup {
+        inlay_hints = {
+            --highlight = "LspInlayHint",
+            highlight = "Comment",
+        }
+    }
 end
 
 local nvim_lsp = require("lspconfig")
@@ -29,7 +44,20 @@ local function on_attach(client, bufnr)
     end
 
     if _G.plugin_loaded("nvim-navic") then
-        require("nvim-navic").attach(client, bufnr)
+        if client.supports_method "textDocument/documentSymbol" and client.name ~= "bashls" then
+            require("nvim-navic").attach(client, bufnr)
+        end
+    end
+
+    if _G.plugin_loaded("lsp-format.nvim") then
+        require("lsp-format").on_attach(client)
+    end
+
+    if _G.plugin_loaded("lsp-inlayhints.nvim") then
+        if client.supports_method "textDocument/inlayHint" then
+            print("inlayHints supported!")
+            require("lsp-inlayhints").on_attach(client, bufnr)
+        end
     end
 
 
@@ -43,11 +71,12 @@ end
 
 local servers = {
     -- "bashls",
-    "ccls",
+    --"ccls",
+    "clangd",
     -- "clojure_lsp",
     "cmake",
     "cssls",
-    "diagnosticls",
+    --"diagnosticls",
     "hls",
     "html",
     -- "jdtls",
@@ -59,41 +88,50 @@ local servers = {
     -- "pyright",
     -- "rnix",
     --"rust_analyzer",
+    "pyright",
     "sumneko_lua",
     "texlab",
     "tsserver",
     "vimls",
     "yamlls",
+    "efm",
+}
+
+local efm = require("plugins._efm")
+--local isort = require "efm/isort"
+--local flake8 = require "efm/flake8"
+--local mypy = require "efm/mypy"
+
+efm_languages = {
+    python = { efm.black, efm.isort, efm.flake8, efm.mypy },
 }
 
 local configs = {
-    diagnosticls = require("plugins._lsp_diagnosticls"),
+    --diagnosticls = require("plugins._lsp_diagnosticls"),
     sumneko_lua = require("plugins._lsp_sumneko_lua"),
-    cssls = { cmd = { "vscode-css-languageserver", "--stdio" } },
+    cssls = {
+        cmd = { "vscode-css-languageserver", "--stdio" }
+    },
+    efm = {
+        init_options = { documentFormatting = true },
+        filetypes = vim.tbl_keys(efm_languages),
+        settings = {
+            rootMarkers = { ".git/" },
+            lintDebounce = 100,
+            languages = efm_languages,
+        }
+    },
 }
 
--- require("plugins.lspconfig.matlab")
-
-local ok, _ = pcall(require, "plugins.lspconfig.py_custom")
-table.insert(servers, ok and "py_custom" or "pyright")
-
 local config_defaults = {}
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 require("plugins._nvim_cmp")
-
-local cmp_nvim_lsp = nil
-if _G.plugin_loaded("cmp-nvim-lsp") then
-    cmp_nvim_lsp = require("cmp_nvim_lsp")
-    config_defaults = vim.tbl_extend("error", config_defaults, {
-        capabilities = cmp_nvim_lsp.update_capabilities(
-            vim.lsp.protocol.make_client_capabilities()
-        ),
-    })
-end
 
 for _, lsp in ipairs(servers) do
     local config = configs[lsp] or {}
     config.on_attach = on_attach
+    config.capabilities = capabilities
     config = vim.tbl_extend("keep", config, config_defaults)
     nvim_lsp[lsp].setup(config)
 end

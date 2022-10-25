@@ -12,6 +12,11 @@ end
 --}
 
 require("rust-tools").setup({
+    tools = {
+        inlay_hints = {
+            auto = false,
+        },
+    },
     server = {
         on_attach = require("plugins._lspconfig"),
     }

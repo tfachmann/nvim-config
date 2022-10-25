@@ -55,6 +55,8 @@ local function packer_spec()
   use {"jose-elias-alvarez/"        .. "null-ls.nvim"           } -- LSP extension
   use {"neovim/"                    .. "nvim-lspconfig"         } -- LSP config
   use {"williamboman/"              .. "nvim-lsp-installer"     } -- LSP installer
+  use {"lukas-reineke/"             .. "lsp-format.nvim"        } -- LSP Formatting
+  use {"lvimuser/"                  .. "lsp-inlayhints.nvim"    } -- LSP inlayHints
   use {"SmiteshP/"                  .. "nvim-navic"             } -- LSP based statusline
   use {"mfussenegger/"              .. "nvim-dap"               } -- Debugger
   use {"mfussenegger/"              .. "nvim-dap-python"        } -- Debugger python
