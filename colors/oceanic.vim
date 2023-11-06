@@ -9,7 +9,7 @@
   if exists("syntax_on")
     syntax reset
   endif
-  let g:colors_name="OceanicNext"
+  let g:colors_name="oceanic"
 " }}}
 " {{{ Italics
   let g:oceanic_next_terminal_italic = get(g:, 'oceanic_next_terminal_italic', 0)
@@ -285,4 +285,3 @@ let g:terminal_color_15=s:base05[0]
 
 let g:terminal_color_background=s:base00[0]
 let g:terminal_color_foreground=s:base10[0]
-
